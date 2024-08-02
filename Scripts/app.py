@@ -6,6 +6,8 @@ from datetime import datetime
 import win32com.client
 import glob, os, openpyxl, re
 import pythoncom
+import seaborn as sns
+import matplotlib.pyplot as plt 
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -77,13 +79,20 @@ def select_reorder(df):
 title_main('PSA Rebates')
 pythoncom.CoInitialize() 
 
-usr_name = st.sidebar.multiselect('Select your username', ['john.tan', 'linda.lim'], placeholder='Choose 1', 
+st.sidebar.header("Line graph")
+lst_num_week = st.sidebar.multiselect('Select number of weeks to plot', [5,6,7,8], placeholder='Choose 1', 
                           max_selections=2)
-if usr_name is not None:
-    if st.sidebar.button('Confirm Username'):
-            usr_email = usr_name[0]+ '@sh-cogent.com.sg' #your outlook email address
-            st.sidebar.write(f'User email: {usr_email}')
-            outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI") 
+if st.sidebar.button('Confirm weeks'):
+    if lst_num_week is not None:
+        st.sidebar.write(f'Selected weeks: {lst_num_week[0]}')
+        num_week = lst_num_week[0]
+    else:
+        st.sidebar.write('please select number of weeks')
+#if usr_name is not None:
+    #if st.sidebar.button('Confirm Username'):
+            #usr_email = usr_name[0]+ '@sh-cogent.com.sg' #your outlook email address
+            #st.sidebar.write(f'User email: {usr_email}')
+            #outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI") 
 def user_email(usr_name):
     usr_email = usr_name[0] + '@sh-cogent.com.sg'
     return usr_email
@@ -174,7 +183,7 @@ elif dataUpload is not None:
             email_receiver = usr_email
             #email_receiver = st.multiselect('Select one email', ['john.tan@sh-cogent.com.sg', 'vieming@yahoo.com'])
             email_sender = "john.tan@sh-cogent.com.sg"
-            email_password = "PASSWORD" #st.secrets["password"]
+            email_password = "Realmadrid8985@" #st.secrets["password"]
 
             body = """
                 <html>
@@ -316,7 +325,7 @@ elif dataUpload is not None:
                 return df_count
             st.write("20 ft/40 ft offpeak count")
             st.table(count_occurrences(calculate_rebate(add_offpeak_columns(psa_rebate_indicator))))
-            #psa_offpeak_count = count_occurrences(calculate_rebate(add_offpeak_columns(psa_rebate_indicator)))
+            psa_offpeak_count = count_occurrences(calculate_rebate(add_offpeak_columns(psa_rebate_indicator)))
 
             def offpeak_rebate_sums(df_rebate):
                 # Filter rows based on conditions
@@ -342,7 +351,91 @@ elif dataUpload is not None:
 
             sums = sum_and_round(offpeak_rebate_sums(calculate_rebate(add_offpeak_columns(psa_rebate_indicator))))
             #st.write(f"total_offpeak_rebate_24hr: {sums['offpeak_24hr']}") #st.write(f"total_offpeak_rebate_48hr: {sums['offpeak_48hr']}")
-            
+            df_offpeak_rebate_sums = offpeak_rebate_sums(calculate_rebate(add_offpeak_columns(psa_rebate_indicator)))
+
+            #20240801
+            df_overall_rebate_efficiency = pd.read_excel(r'https://raw.githubusercontent.com/JohnTan38/Project-Income/main/Overall_Rebate_Efficiency.xlsx', sheet_name='OverallRebateEfficiency', 
+                                 engine='openpyxl')
+            df_psa_lolo = pd.read_excel(r'https://raw.githubusercontent.com/JohnTan38/Project-Income/main/Overall_Rebate_Efficiency.xlsx', sheet_name='PSA_LOLO',
+                             engine='openpyxl')
+            psa_lolo_20 = df_psa_lolo['psa_lolo_20']
+            psa_lolo_40 = df_psa_lolo['psa_lolo_40']
+            #sum across cols
+            def sum_cols(df, col_sum):
+                df[col_sum] = df.sum(axis=1)
+                return df
+
+            df_rebate_total=sum_cols(df_offpeak_rebate_sums, 'sum_offpeak_rebate')
+
+            rebate_efficiency_20 = (df_rebate_total['sum_offpeak_rebate']['20'] /psa_lolo_20) /0.5932
+            rebate_efficiency_40 = (df_rebate_total['sum_offpeak_rebate']['40'] /psa_lolo_40) /0.5932
+            overall_rebate_efficiency = math.ceil(((rebate_efficiency_20+rebate_efficiency_40)/2)*100) /100 #round 2 decimals
+
+            def add_column(df,new_week):
+                last_column = df.columns[-1]
+                last_week_number = int(last_column.split('_')[-1]) #get week number of last col
+                new_column = 'Week_'+ str(last_week_number+1)
+                df[new_column] = new_week
+                return df
+                        
+            df_overall_rebate_efficiency_new = add_column(df_overall_rebate_efficiency, overall_rebate_efficiency)
+            # Transpose the DataFrame to have weeks as rows
+            df_overall_rebate_efficiency_new = df_overall_rebate_efficiency_new.T
+            df_overall_rebate_efficiency_new.columns = ['Efficiency']
+            df_overall_rebate_efficiency_new.index.name = 'Week'
+
+            # Function to plot the line chart
+            def plot_efficiency(df_efficiency,num_weeks):
+    
+                df_to_plot = df_efficiency.tail(num_weeks) # Select the number of weeks to plot
+        
+                fig=plt.figure(figsize=(10, 5)) # Plot the line chart
+                plt.plot(df_to_plot.index, (df_to_plot['Efficiency']*100).round(2), marker='o')
+                for x,y in zip(df_to_plot.index, (df_to_plot['Efficiency']*100).round(2)):
+                    plt.text(x,y, f'{y:.2f}%', ha='center', va='bottom')
+    
+                plt.ylim(0,100)
+                plt.xlabel('Week Number')
+                plt.ylabel('Efficiency (%)')
+                plt.title('PSA Loaded Rebates Efficiency') # Set the labels and title    
+                #plt.show() # Show the plot
+                st.pyplot(fig) #streamlit
+
+            #num_week = int(input("Enter the number of weeks to plot: ")) # User input for the number of weeks to plot
+            plot_efficiency(df_overall_rebate_efficiency_new,lst_num_week[0]) # Call the function with the user input
+
+            def append_dollar(df):
+                # Iterate over each col in df
+                for col in df.columns:
+                    # Convert the col to string, Add '$' to the beginning of each col
+                    df[col] = '$' + df[col].astype(str) 
+                    return df
+
+            #20240802
+            def plot_clustered_bar(df, df_rebate):
+                # Set the color palette as gradient from light blue to dark blue
+                sns.set_palette(sns.color_palette("Blues", len(df.columns)))
+    
+                fig, ax = plt.subplots() # Create a figure and a set of subplots
+                # Plot the DataFrame as a bar plot with the specified parameters
+                df.plot(kind='bar', ax=ax)
+
+                # Append column values of df_rebate to the respective bar charts
+                for i, p in enumerate(ax.patches):
+                    ax.annotate(str(df_rebate.iloc[i//len(df.columns), i%len(df.columns)]), 
+                               (p.get_x() * 1.005, p.get_height() * 1.005))
+    
+                plt.ylim(0, 100) # Set the y-axis limit    
+                plt.title('Nonpeak - container volume and $rebate') # Set the title of the plot
+                plt.ylabel('Container volume and $rebate')
+                plt.xlabel('Container size')   
+                #plt.show() # Show the plot
+                st.pyplot(fig,ax)
+
+            df_offpeak_rebate_sums_dollar = append_dollar(df_offpeak_rebate_sums)
+            plot_clustered_bar(psa_offpeak_count, (df_offpeak_rebate_sums_dollar.iloc[:, :-1]).T) #call the function
+
+
             html_str_offpeak_rebate24 = f"""
                 <p style='background-color:#F0FFFF;
                 color: #483D8B;
@@ -376,19 +469,21 @@ elif dataUpload is not None:
                 <br></p>"""
             st.markdown('''
                 **24hr < TOTAL OFFPEAK REBATES ($) < 48hr** '''+html_str_offpeak_rebate48, unsafe_allow_html=True)
+            
+
 
             success_df('Data generated successfully!')
 #st.markdown('''
             #**REBATES** :orange[rebates] :blue-background[blue highlight] :cherry_blossom:''')
 
-            sheetName = 'psa_rebate_'+ datetime.now().strftime("%Y%m%d %H%M")
-            try:
-                    calculate_rebate(add_offpeak_columns(psa_rebate_indicator)).to_csv("C:/Users/"+usr_name[0]+ "/Downloads/"+ 'psa_rebate.csv', mode='x')
-            except FileExistsError:
-                    calculate_rebate(add_offpeak_columns(psa_rebate_indicator)).to_csv("C:/Users/"+usr_name[0]+ "/Downloads/"+ 'psa_rebate_1.csv')
+            #sheetName = 'psa_rebate_'+ datetime.now().strftime("%Y%m%d %H%M")
+            #try:
+                    #calculate_rebate(add_offpeak_columns(psa_rebate_indicator)).to_csv("C:/Users/"+usr_name[0]+ "/Downloads/"+ 'psa_rebate.csv', mode='x')
+            #except FileExistsError:
+                    #calculate_rebate(add_offpeak_columns(psa_rebate_indicator)).to_csv("C:/Users/"+usr_name[0]+ "/Downloads/"+ 'psa_rebate_1.csv')
             
-            usr_email = user_email(usr_name)
-            send_email_psa_reabte(offpeak_rebate_sums(calculate_rebate(add_offpeak_columns(psa_rebate_indicator))),usr_email)
+            #usr_email = user_email(usr_name)
+            #send_email_psa_reabte(offpeak_rebate_sums(calculate_rebate(add_offpeak_columns(psa_rebate_indicator))),usr_email)
 
 
 footer_html = """
