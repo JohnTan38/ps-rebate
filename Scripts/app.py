@@ -13,11 +13,11 @@ warnings.filterwarnings("ignore")
 
 import datetime as datetime
 
-import smtplib, email, ssl
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+#import smtplib, email, ssl
+#from email import encoders
+#from email.mime.base import MIMEBase
+#from email.mime.multipart import MIMEMultipart
+#from email.mime.text import MIMEText
 
 st.set_page_config('PSA Rebates', page_icon="🏛️", layout='wide')
 def title(url):
@@ -77,7 +77,7 @@ def select_reorder(df):
     return df[df['STATUS'] == 'REORDER']
 
 title_main('PSA Rebates')
-pythoncom.CoInitialize() 
+#pythoncom.CoInitialize() 
 
 st.sidebar.header("Line graph")
 lst_num_week = st.sidebar.multiselect('Select number of weeks to plot', [5,6,7,8], placeholder='Choose 1', 
@@ -178,63 +178,63 @@ elif dataUpload is not None:
 
             return df
 
-        def send_email_psa_reabte(df,usr_email):
-            usr_email = user_email(usr_name)
-            email_receiver = usr_email
+        #def send_email_psa_reabte(df,usr_email):
+            #usr_email = user_email(usr_name)
+            #email_receiver = usr_email
             #email_receiver = st.multiselect('Select one email', ['john.tan@sh-cogent.com.sg', 'vieming@yahoo.com'])
-            email_sender = "john.tan@sh-cogent.com.sg"
-            email_password = "Realmadrid8985@" #st.secrets["password"]
+            #email_sender = "john.tan@sh-cogent.com.sg"
+            #email_password = "" #st.secrets["password"]
 
-            body = """
-                <html>
-                <head>
-                <title>Dear User</title>
-                </head>
-                <body>
-                <p style="color: blue;font-size:25px;">PSA Rebate ($) offpeak/peak.</strong><br></p>
+            #body = """
+                #<html>
+                #<head>
+                #<title>Dear User</title>
+                #</head>
+                #<body>
+                #<p style="color: blue;font-size:25px;">PSA Rebate ($) offpeak/peak.</strong><br></p>
 
-                </body>
-                </html>
+                #</body>
+                #</html>
 
-                """+ df.to_html() +"""
+                #"""+ df.to_html() +"""
         
-                <br>This message is computer generated. """+ datetime.now().strftime("%Y%m%d %H:%M:%S")
+                #<br>This message is computer generated. """+ datetime.now().strftime("%Y%m%d %H:%M:%S")
 
-            mailserver = smtplib.SMTP('smtp.office365.com',587)
-            mailserver.ehlo()
-            mailserver.starttls()
-            mailserver.login(email_sender, email_password)
+            #mailserver = smtplib.SMTP('smtp.office365.com',587)
+            #mailserver.ehlo()
+            #mailserver.starttls()
+            #mailserver.login(email_sender, email_password)
        
-            try:
-                if email_receiver is not None:
-                    try:
-                        rgx = r'^([^@]+)@[^@]+$'
-                        matchObj = re.search(rgx, email_receiver)
-                        if not matchObj is None:
-                            usr = matchObj.group(1)
+            #try:
+                #if email_receiver is not None:
+                    #try:
+                        #rgx = r'^([^@]+)@[^@]+$'
+                        #matchObj = re.search(rgx, email_receiver)
+                        #if not matchObj is None:
+                            #usr = matchObj.group(1)
                     
-                    except:
-                        pass
+                    #except:
+                        #pass
 
-                msg = MIMEMultipart()
-                msg['From'] = email_sender
-                msg['To'] = email_receiver
-                msg['Subject'] = 'PSA Rebate Summary '+ datetime.today().strftime("%Y%m%d %H:%M")
-                msg['Cc'] = 'john.tan@sh-cogent.com.sg'
+                #msg = MIMEMultipart()
+                #msg['From'] = email_sender
+                #msg['To'] = email_receiver
+                #msg['Subject'] = 'PSA Rebate Summary '+ datetime.today().strftime("%Y%m%d %H:%M")
+                #msg['Cc'] = 'john.tan@sh-cogent.com.sg'
         
-                msg.attach(MIMEText(body, 'html'))
-                text = msg.as_string()
+                #msg.attach(MIMEText(body, 'html'))
+                #text = msg.as_string()
 
-                with smtplib.SMTP("smtp.office365.com", 587) as server:
-                    server.ehlo()
-                    server.starttls()
-                    server.login(email_sender, email_password)
-                    server.sendmail(email_sender, email_receiver, text)
-                    server.quit()
+                #with smtplib.SMTP("smtp.office365.com", 587) as server:
+                    #server.ehlo()
+                    #server.starttls()
+                    #server.login(email_sender, email_password)
+                    #server.sendmail(email_sender, email_receiver, text)
+                    #server.quit()
                 #st.success(f"Email sent to {email_receiver} 💌 🚀")
-                success_df(f"Email sent to {email_receiver} 💌 🚀")
-            except Exception as e:
-                st.error(f"Email not sent: {e}")
+                #success_df(f"Email sent to {email_receiver} 💌 🚀")
+            #except Exception as e:
+                #st.error(f"Email not sent: {e}")
 
 
         if st.button('Lets get rebates'):
