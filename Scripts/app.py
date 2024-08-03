@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 import math,re
 from datetime import datetime
-import win32com.client
+#import win32com.client
 import glob, os, openpyxl, re
-import pythoncom
+#import pythoncom
 import seaborn as sns
 import matplotlib.pyplot as plt 
 import warnings
@@ -80,7 +80,7 @@ title_main('PSA Rebates')
 #pythoncom.CoInitialize() 
 
 st.sidebar.header("Line graph")
-lst_num_week = st.sidebar.multiselect('Select number of weeks to plot', [5,6,7,8], placeholder='Choose 1', 
+lst_num_week = st.sidebar.multiselect('Select number of weeks to plot', [5,6,7,8,9,10], placeholder='Choose 1', 
                           max_selections=2)
 if st.sidebar.button('Confirm weeks'):
     if lst_num_week is not None:
@@ -426,9 +426,9 @@ elif dataUpload is not None:
                                (p.get_x() * 1.005, p.get_height() * 1.005))
     
                 plt.ylim(0, 100) # Set the y-axis limit    
-                plt.title('Nonpeak - container volume and $rebate') # Set the title of the plot
-                plt.ylabel('Container volume and $rebate')
-                plt.xlabel('Container size')   
+                plt.title('Nonpeak - container volume and $rebate', fontsize=9) # Set the title of the plot
+                plt.ylabel('Container volume and $rebate', fontsize=8)
+                plt.xlabel('Container size', fontsize=8)   
                 #plt.show() # Show the plot
                 st.pyplot(fig,ax)
 
