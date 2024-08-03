@@ -80,7 +80,7 @@ title_main('PSA Rebates')
 #pythoncom.CoInitialize() 
 
 st.sidebar.header("Line graph")
-lst_num_week = st.sidebar.multiselect('Select number of weeks to plot', [5,6,7,8], placeholder='Choose 1', 
+lst_num_week = st.sidebar.multiselect('Select number of weeks to plot', [5,6,7,8,9,10], placeholder='Choose 1', 
                           max_selections=2)
 if st.sidebar.button('Confirm weeks'):
     if lst_num_week is not None:
