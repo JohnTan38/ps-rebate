@@ -426,9 +426,9 @@ elif dataUpload is not None:
                                (p.get_x() * 1.005, p.get_height() * 1.005))
     
                 plt.ylim(0, 100) # Set the y-axis limit    
-                plt.title('Nonpeak - container volume and $rebate') # Set the title of the plot
-                plt.ylabel('Container volume and $rebate')
-                plt.xlabel('Container size')   
+                plt.title('Nonpeak - container volume and $rebate', fontsize=9) # Set the title of the plot
+                plt.ylabel('Container volume and $rebate', fontsize=8)
+                plt.xlabel('Container size', fontsize=8)   
                 #plt.show() # Show the plot
                 st.pyplot(fig,ax)
 
