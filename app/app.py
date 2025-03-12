@@ -19,7 +19,7 @@ import datetime as datetime
 #from email.mime.multipart import MIMEMultipart
 #from email.mime.text import MIMEText
 
-st.set_page_config('PSA Rebates', page_icon="🏛️", layout='wide')
+st.set_page_config('PS Rebates', page_icon="🏛️", layout='wide')
 def title(url):
      st.markdown(f'<p style="color:#2f0d86;font-size:22px;border-radius:2%;"><br><br><br>{url}</p>', unsafe_allow_html=True)
 def title_main(url):
@@ -76,7 +76,7 @@ def process_dataframe(df_data):
 def select_reorder(df):
     return df[df['STATUS'] == 'REORDER']
 
-title_main('PSA Rebates')
+title_main('PS Rebates')
 #pythoncom.CoInitialize() 
 
 st.sidebar.header("Line graph")
@@ -507,7 +507,7 @@ footer_html = """
             text-decoration: underline;
         }
     </style>
-        All rights reserved @2024. Cogent Holdings IT Solutions.      
+        All rights reserved @2025.      
     </div>
 """
 st.markdown(footer_html,unsafe_allow_html=True)
